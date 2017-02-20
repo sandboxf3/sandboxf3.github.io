@@ -1,0 +1,18 @@
+---
+title: "how to write a post with images"
+author: "Lorenz Walthert"
+date: "11/15/2016"
+output: html_document
+---
+Until the very end, do as normal. Then: 
+
+* Save images as png with a name that starts with the date of the publication 
+  the image belongs to.
+* Set the command that produces the immage in its own code chunck, and set 
+  `eval = FALSE`. 
+* Build the site locally and test the outcome. It should NOT show any pictures.
+* Include a stable link to your devel repository.
+* Deploy the site to github  *devel* branch.
+* Check whether the local build looks good.
+* Merge devel with master and push master to github.
+

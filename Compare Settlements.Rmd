@@ -1,0 +1,198 @@
+---
+title: "Informal Settlements in Nairobi"
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(cache = F) # put stuff in cache
+knitr::opts_chunk$set(echo = F) # put stuff in cache
+
+```
+
+```{r, echo = F}
+source("placeimg.R")
+kiandutu <- "compare_settlements_img/kiandutu/"
+sepu <- "compare_settlements_img/sepu/"
+settlements <- c("Kiandutu", "Sepu")
+files <- list.files(sepu)
+details <- file.info(list.files(sepu, full.names = T))
+types <- gsub("(.*)-.*", "\\1", files)  # match all the the beginning of the words (note that star is not greedy in the sense that it takes the dash also. It does not take the dash because otherwise there would be no match, as two dashes had to follow each other.
+types <- c("lenghtofstay", "relowhn", "rent", "elect", "agepyr", "occgenderage", "unempgendage", "unemped", "empspace")
+# alternative formulation
+
+# gsub("([[:alpha:]]*)-.*", "\\1", files)
+
+
+# use for replacement of titles with title {.tabset{
+# pattern: ^(##[^#]*)$ 
+# interreation: starts with ##, then non-hash, then 
+
+# ^(\\#\\#[^\\#]*[^\\{.tabset\\}])$
+# ^(##[^#]*[^\\{.tabset\\}])$
+
+# raw <- readLines(con = "/Users/lorenz/Dropbox/Strathmore University/SEPU/2-code/4-r_code/r-project/Preliminary Data Analysis.Rmd")
+# a<- grep("^```\\{r(,?)( ?)(.*)(,|\\})", raw, value = T)
+# gsub("^```\\{r(,?)( ?)(.*)(,|\\}|=).*", "\\3", a)
+
+```
+
+I created the following visuals for the *IDRC Project 108242 - Unlocking the Powerty Penalty and up-scaling the Resepect for Rights in Kenya's Informal Settlemens* at 
+Strathmore Universiy in Nairobi, Kenia. They give insights into two informal 
+settlements in Nairobi - Kiandutu and Sepu - and how they compare regarding key 
+socio-economic figures.
+
+# Household Level Analysis 
+The first section centers on household level analysis.
+```{r}
+i <- 1
+j <- 1
+```
+
+## Length of Stay in Settlement {.tabset}
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+i <- i + 1
+```
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+j <- j + 1
+i <- 1
+```
+
+## Relationship with Owner {.tabset}
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+i <- i + 1
+```
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+j <- j + 1
+i <- 1
+```
+
+
+## Expenses
+
+### Rent {.tabset}
+#### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+i <- i + 1
+```
+
+#### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+j <- j + 1
+i <- 1
+```
+
+### Electricity {.tabset}
+
+#### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+i <- i + 1
+```
+
+#### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+j <- j + 1
+i <- 1
+```
+
+## Spatial Analysis {.tabset}
+
+# Occupant Level Analysis
+In the second part of the analysis, we investigate individuals rather than households as a whole
+
+
+## Age Distribution {.tabset}
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+i <- i + 1
+```
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+j <- j + 1
+i <- 1
+```
+
+
+## Occupation by Gender and Age {.tabset}
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+i <- i + 1
+```
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+j <- j + 1
+i <- 1
+```
+
+## Unemployment by Gender and Age {.tabset}
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+i <- i + 1
+```
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+j <- j + 1
+i <- 1
+```
+
+## Unemployment by Education {.tabset}
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+i <- i + 1
+```
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+j <- j + 1
+i <- 1
+```
+
+## Employment and Workplace {.tabset}
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+i <- i + 1
+```
+
+### `r settlements[i]`
+```{r}
+placeimg(types[j], tolower(settlements[i]))
+j <- j + 1
+i <- 1
+```

@@ -1,0 +1,214 @@
+---
+title: "Scalable plotting with ggplot2 - Part I"
+description: How can you take advantage of integrating ggplot2 with core 
+  elements of the R language to create more flexible and adaptive plots while 
+  reducing redundancy? This series discusses how we can use an lapply approach
+  to create column-wise visualizations that adapt to data characteristics such 
+  as the class. Part I outlines the basics of such an approach.
+date: "2016-10-7 20:25"
+permalink: /proggplotI/
+tags: ggplot2
+layout: post
+comments: true
+---
+
+## Introduction
+<br/>
+This series discusses how we can use ggplot2 to produce plots for each column 
+of a data frame that depend on characteristics of this column 
+(e.g. the class of a column) in a scalable manner.
+To this end, we integrate the following concepts / functions:
+
+* the `ggplot2` package
+* `lapply`
+* anonymous functions
+* non-standard evaluation
+* lexical scoping
+
+The reader should be familiar with these concepts, otherwise, Hadley Wickham's
+[Advanced R](http://adv-r.had.co.nz) might be a good starting point to read 
+up on all but the first topic.
+
+The approach discussed here generalizes to other situations in which one wants
+to customize plots based on the characteristics of input data. 
+
+## The problem
+<br/>
+For this blog post, we are going to use a subset of the diamonds data set.
+```{r, message=FALSE}
+library("tidyverse")
+source("multiplot.R") # http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
+```
+
+```{r}
+dta <- select(diamonds, price, cut, carat, color)
+head(dta)
+```
+
+Now, imagine you want a visual summary for each variable. Unfortunately, 
+the variables are not all of the same class. Otherwise, you might transform the 
+data into long format and use facets.
+For the factors, you could do a bar chart, for the numerical variables, you might want to
+use a density plot. Let's have a look at a first approach. You could do the 
+following for cut and color. 
+```{r}
+p1 <- ggplot(dta, aes(cut))   + geom_bar()
+p2 <- ggplot(dta, aes(color)) + geom_bar()
+```
+
+Similarly, you can do for price and carat
+```{r}
+p3 <- ggplot(dta, aes(price)) + geom_density()
+p4 <- ggplot(dta, aes(carat)) + geom_density()
+```
+```{r, eval = FALSE}
+# create a plot with 4 panels
+multiplot(p1, p2, p3, p4, cols = 2)
+```
+![](https://github.com/lorenzwalthert/lorenzwalthert.github.io/raw/devel/_source/2016-10-07_initial.png)
+<br/>
+
+Now, you can note two issues:
+
+* There is a lot of code duplication. For each plot, you need another line of
+  code that is almost identical to the ones you have already. This is not
+  scalable to data sets with many columns. This problem will be addressed in this
+  post.
+* You might want to further customize your plots. For
+  example, changing the x-axis of the density plots from linear to logarithmic 
+  might be desirable to make better use of space. This problem will be addressed
+  in the second part of the series.
+
+
+  
+  
+## A solution
+<br/>
+To address the first problem, we can create a function that
+behaves differently depending on whether the input is factorial or numeric.
+```{r, eval=FALSE}
+# a function that returns geom_density if the input is numeric, 
+# geom_bar otherwise
+geom_hist_or_bar <- function() {
+  if(current_class() %in% c("integer", "numeric")) {
+  geom_density()
+  } else {
+  geom_bar()
+  }
+}
+```
+`current_class` is a function that magically gets the class of the variable
+that you used in `aes` of `ggplot`. It will be explained at a later stage.
+Having defined that function, you could rewrite the above as follows:
+```{r, eval = FALSE}
+ggplot(dta, aes(color)) + geom_hist_or_bar()
+ggplot(dta, aes(cut))   + geom_hist_or_bar()
+ggplot(dta, aes(price)) + geom_hist_or_bar()
+ggplot(dta, aes(carat)) + geom_hist_or_bar()
+```
+This is a slight improvement on the first solution because you always call the
+same functions for all plots. Hence, we can kind of use an `apply` approach to 
+reduce the redundancy of this problem. You might think of the following:
+```{r, eval=FALSE}
+lapply(dta, function(g) ggplot(dta, aes(g)) + geom_hist_or_bar)
+```
+Unfortunately, this does not quite work because for each iteration in 
+`lapply`, `g` will be the actual 
+values from each column, but in `aes`, you need the name of the column, not the 
+actual value. Since there is no way to get from the values to the names, but 
+if we have the names, we can get the values, the trick is to loop over the names
+of the data frame.
+```{r, eval=FALSE}
+lapply(names(dta), function(g) ggplot(dta, aes(g)) + geom_hist_or_bar)
+```
+However, we are not quite there yet. Due to non-standard evaluation, we need to 
+further change two things:
+
+* use `aes_` instead of `aes` so `g` is not actually g, but points to something
+  else.
+* use `as.name(g)` instead of `g` because `g` is just the name of an object (i.e. 
+  "cut" for the first iteration), not the object itself. 
+  
+```{r, eval=FALSE}
+lapply(names(dta), function(g) {
+  ggplot(dta, aes_(as.name(g))) + 
+    geom_hist_or_bar() +
+    scale_x_adapt()
+})
+
+```
+The only explanation I still owe you is how the function `current_class()` works.
+It only works because it is called from within `lapply`. 
+Hence, the parent frame of `current_class` (the function that *calls* 
+`current_class`) has `lapply` as its parent. For a given iteration, 
+the value of g is available in the environment of `lapply`. `currrent_class` 
+simply needs to go *up the tree* until it reaches the environment of `lapply` 
+and get the value of g and figure out it's class. That is done as follows.
+```{r, eval = FALSE}
+current_class <- function() {
+  # returns the first class of the current iteration*
+  class(dta[[get("g", parent.frame(n = 2))]])[1]
+}
+# * first element since object can have multiple classes
+```
+
+Now, we are done. This is all code we need to get our solution.
+```{r}
+##  ............................................................................
+##  get set up
+library("tidyverse")
+source("multiplot.R") # http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
+
+##  ............................................................................
+##  define helper functions
+current_class <- function() {
+  # returns the first class of the current iteration*
+  class(dta[[get("g", parent.frame(n = 2))]])[1]
+}
+# * first element since object can have multiple classes
+
+geom_hist_or_bar <- function() {
+  color <- "gray"
+  if (current_class() %in% c("integer", "numeric")) {
+  geom_density(color = color, fill = color)
+  } else if(current_class() %in% c("factor", "ordered")){
+  geom_bar(color = color, fill = color)
+  }
+}
+
+##  ............................................................................
+##  create all plots
+all_plots <- lapply(names(dta), function(g) {
+  ggplot(dta, aes_(as.name(g))) + 
+    geom_hist_or_bar()
+  }
+)
+
+```
+
+Finally, we can plot the result.
+```{r, eval = FALSE}
+# use plotlist not ... as input
+do.call("multiplot", list(plotlist = all_plots, cols = 2)) 
+```
+![](https://github.com/lorenzwalthert/lorenzwalthert.github.io/raw/devel/_source/2016-10-7_final.png)
+
+## Conclusion
+<br/>
+In this blog post, a few advanced concepts from the R toolbox were integrated 
+in order to create column-wise visual data summaries. To this end, we 
+created a set of functions which can be used to generate plots for different 
+data types (numerical and factorial). 
+This set of functions can be used in conjunction with `lapply` to
+create summary plots, which would not be possible if different functions had to
+be called for the different data types. The solution presented above is
+scalable to data sets with an arbitrary number of columns without altering the 
+code.
+
+## Outlook
+<br/>
+We will expand on this by customizing the appearance of the plots further.
+Namely, the second part of the series centers on using a log-transformed
+x-scale for continuous data and how to generate appropriate breaks, but the
+principles we will develop there can be generalized well to other customization
+needs.

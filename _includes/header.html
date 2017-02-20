@@ -1,0 +1,57 @@
+<header class="site-header">
+
+  <div class="wrapper">
+
+    <nav class="site-nav">
+      <div class="trigger">
+
+
+        <!-- auto generated header
+
+        {% for page in site.pages %}
+          {% if page.title %}
+          <a class="page-link" href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
+          {% endif %}
+        {% endfor %}
+        -->
+
+
+        <!-- {{ site.title }} instead of blog -->
+        <a class="page-link" href="{{ site.baseurl }}/">
+          <i class="fa fa-rss" aria-hidden="true"></i>
+
+          blog
+          </a>
+        <a class="page-link" href="{{ site.baseurl }}/shiny/">
+          <i class="fa fa-tachometer" aria-hidden="true">
+            shiny
+          </i>
+        </a>
+        <a class="page-link" href="{{ site.baseurl }}/development/">
+          <i class="fa fa-code" aria-hidden="true">
+            software development
+          </i>
+        </a>
+      </div>
+      <div class="trigger">
+
+        <a class="page-link" href="{{ site.baseurl }}/about/">
+          <i class="fa fa-info-circle" aria-hidden="true">
+            about
+          </i>
+          </a>
+        <!-- deactivated links
+        <a class="page-link" href="{{ site.baseurl }}/Compare_Settlements.html">ggplot2</a>
+        <a class="page-link" href="{{ site.baseurl }}/portfolio/">portfolio</a>
+
+        -->
+
+
+
+
+      </div>
+    </nav>
+
+  </div>
+
+</header>
